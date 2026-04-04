@@ -121,7 +121,7 @@ function buildCampaigns(): Campaign[] {
     id: cId(c.nombre),
     nombre: c.nombre,
     numero_contrato: c.nombre,
-    tipo_objetivo: (c.objetivo_mes > 0 ? 'Mensual' : 'Total') as const,
+    tipo_objetivo: c.objetivo_mes > 0 ? 'Mensual' as const : 'Total' as const,
     objetivo_mensual: c.objetivo_mes,
     objetivo_total: c.objetivo_total,
     fecha_inicio: '',
