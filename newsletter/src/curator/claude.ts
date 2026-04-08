@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import type { RawArticle, CuratedStory } from "../types";
 
 const SYSTEM_PROMPT = `You are an expert tech journalist and startup ecosystem analyst who curates a daily newsletter for a sophisticated European reader: a founder, operator, or investor who wants to stay informed about European startups, global VC trends, AI breakthroughs, and meaningful product launches. You have high standards — you prefer substance over hype. You are concise, insightful, and always explain why something matters for people building or funding companies.`;
@@ -17,12 +17,7 @@ export async function curateTopStories(
   date: string,
   apiKey: string
 ): Promise<CuratedStory[]> {
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_PROMPT,
-  });
-
+  const ai = new GoogleGenAI({ apiKey });
   const unique = deduplicateByUrl(articles);
   console.log(`Sending ${unique.length} unique articles to Gemini for curation...`);
 
@@ -48,8 +43,13 @@ Return ONLY a valid JSON array of 10 objects. No commentary before or after. No 
 ARTICLES:
 ${JSON.stringify(unique, null, 2)}`;
 
-  const result = await model.generateContent(prompt);
-  const responseText = result.response.text();
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash-lite",
+    contents: prompt,
+    config: { systemInstruction: SYSTEM_PROMPT },
+  });
+
+  const responseText = response.text ?? "";
 
   // Parse JSON — with fallback to strip markdown fences
   let parsed: unknown;
