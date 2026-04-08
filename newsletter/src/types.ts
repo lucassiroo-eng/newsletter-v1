@@ -25,10 +25,9 @@ export interface CuratedStory {
 }
 
 export interface NewsletterConfig {
-  anthropicApiKey: string;
+  geminiApiKey: string;
   resendApiKey: string;
   toEmail: string;
   fromEmail: string;
-  newsApiKey: string;
   dryRun: boolean;
 }

@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { RawArticle, CuratedStory } from "../types.js";
 
 const SYSTEM_PROMPT = `You are an expert tech journalist and startup ecosystem analyst who curates a daily newsletter for a sophisticated European reader: a founder, operator, or investor who wants to stay informed about European startups, global VC trends, AI breakthroughs, and meaningful product launches. You have high standards — you prefer substance over hype. You are concise, insightful, and always explain why something matters for people building or funding companies.`;
@@ -17,12 +17,16 @@ export async function curateTopStories(
   date: string,
   apiKey: string
 ): Promise<CuratedStory[]> {
-  const client = new Anthropic({ apiKey });
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: SYSTEM_PROMPT,
+  });
+
   const unique = deduplicateByUrl(articles);
+  console.log(`Sending ${unique.length} unique articles to Gemini for curation...`);
 
-  console.log(`Sending ${unique.length} unique articles to Claude for curation...`);
-
-  const userPrompt = `Today is ${date}. Below are ${unique.length} news articles collected from tech sources in the last 48 hours.
+  const prompt = `Today is ${date}. Below are ${unique.length} news articles collected from tech sources in the last 48 hours.
 
 Your job is to:
 1. Select the 10 most important, interesting, or actionable stories for a tech founder audience.
@@ -44,36 +48,28 @@ Return ONLY a valid JSON array of 10 objects. No commentary before or after. No 
 ARTICLES:
 ${JSON.stringify(unique, null, 2)}`;
 
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 4096,
-    messages: [{ role: "user", content: userPrompt }],
-    system: SYSTEM_PROMPT,
-  });
+  const result = await model.generateContent(prompt);
+  const responseText = result.response.text();
 
-  const responseText =
-    message.content[0].type === "text" ? message.content[0].text : "";
-
-  // Parse JSON — with fallback for markdown fences
+  // Parse JSON — with fallback to strip markdown fences
   let parsed: unknown;
   try {
     parsed = JSON.parse(responseText);
   } catch {
     const match = responseText.match(/\[[\s\S]*\]/);
     if (!match) {
-      throw new Error("Claude did not return a JSON array. Raw response:\n" + responseText.slice(0, 500));
+      throw new Error("Gemini did not return a JSON array. Raw response:\n" + responseText.slice(0, 500));
     }
     parsed = JSON.parse(match[0]);
   }
 
   if (!Array.isArray(parsed)) {
-    throw new Error("Claude returned non-array JSON");
+    throw new Error("Gemini returned non-array JSON");
   }
 
   const stories = parsed as CuratedStory[];
-
   if (stories.length === 0) {
-    throw new Error("Claude returned an empty array");
+    throw new Error("Gemini returned an empty array");
   }
 
   return stories.slice(0, 10);

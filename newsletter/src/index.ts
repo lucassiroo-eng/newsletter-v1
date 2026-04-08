@@ -1,7 +1,6 @@
 import { loadConfig } from "./config.js";
 import { fetchRssArticles } from "./fetchers/rss.js";
 import { fetchHackerNewsArticles } from "./fetchers/hackerNews.js";
-import { fetchNewsApiArticles } from "./fetchers/newsApi.js";
 import { curateTopStories } from "./curator/claude.js";
 import { buildEmailHtml } from "./email/template.js";
 import { sendEmail } from "./email/sender.js";
@@ -16,27 +15,24 @@ async function main(): Promise<void> {
   console.log(`Dry run: ${config.dryRun}`);
   console.log(`Recipient: ${config.toEmail}`);
 
-  // 2. Fetch news from all sources in parallel
+  // 2. Fetch news from all sources in parallel (all 100% free)
   console.log("\n[1/4] Fetching news from all sources...");
-  const [rssArticles, hnArticles, newsApiArticles] = await Promise.all([
+  const [rssArticles, hnArticles] = await Promise.all([
     fetchRssArticles(),
     fetchHackerNewsArticles(),
-    fetchNewsApiArticles(config.newsApiKey),
   ]);
 
-  const allArticles = [...rssArticles, ...hnArticles, ...newsApiArticles];
-  console.log(
-    `  RSS: ${rssArticles.length} | HackerNews: ${hnArticles.length} | NewsAPI: ${newsApiArticles.length}`
-  );
+  const allArticles = [...rssArticles, ...hnArticles];
+  console.log(`  RSS: ${rssArticles.length} | HackerNews: ${hnArticles.length}`);
   console.log(`  Total: ${allArticles.length} articles collected`);
 
   if (allArticles.length === 0) {
-    throw new Error("No articles collected from any source. Check network connectivity and API keys.");
+    throw new Error("No articles collected from any source. Check network connectivity.");
   }
 
-  // 3. Curate top 10 with Claude
-  console.log("\n[2/4] Curating top 10 stories with Claude AI...");
-  const topStories = await curateTopStories(allArticles, today, config.anthropicApiKey);
+  // 3. Curate top 10 with Gemini AI (free tier)
+  console.log("\n[2/4] Curating top 10 stories with Gemini AI...");
+  const topStories = await curateTopStories(allArticles, today, config.geminiApiKey);
   console.log(`  Selected ${topStories.length} stories`);
   topStories.forEach((s) => console.log(`  ${s.rank}. [${s.category}] ${s.title}`));
 

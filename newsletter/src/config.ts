@@ -13,11 +13,10 @@ function require(name: string): string {
 
 export function loadConfig(): NewsletterConfig {
   return {
-    anthropicApiKey: require("ANTHROPIC_API_KEY"),
+    geminiApiKey: require("GEMINI_API_KEY"),
     resendApiKey: require("RESEND_API_KEY"),
     toEmail: require("NEWSLETTER_TO_EMAIL"),
     fromEmail: require("NEWSLETTER_FROM_EMAIL"),
-    newsApiKey: require("NEWSAPI_KEY"),
     dryRun: process.env["DRY_RUN"] === "true",
   };
 }
