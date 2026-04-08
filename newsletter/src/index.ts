@@ -1,9 +1,9 @@
-import { loadConfig } from "./config.js";
-import { fetchRssArticles } from "./fetchers/rss.js";
-import { fetchHackerNewsArticles } from "./fetchers/hackerNews.js";
-import { curateTopStories } from "./curator/claude.js";
-import { buildEmailHtml } from "./email/template.js";
-import { sendEmail } from "./email/sender.js";
+import { loadConfig } from "./config";
+import { fetchRssArticles } from "./fetchers/rss";
+import { fetchHackerNewsArticles } from "./fetchers/hackerNews";
+import { curateTopStories } from "./curator/claude";
+import { buildEmailHtml } from "./email/template";
+import { sendEmail } from "./email/sender";
 
 async function main(): Promise<void> {
   console.log("=== Daily Tech Newsletter ===");

@@ -1,4 +1,4 @@
-import type { CuratedStory } from "../types.js";
+import type { CuratedStory } from "../types";
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   "European Startup": { bg: "#e8f5e9", text: "#2e7d32" },

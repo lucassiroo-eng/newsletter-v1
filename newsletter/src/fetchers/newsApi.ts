@@ -1,4 +1,4 @@
-import type { RawArticle } from "../types.js";
+import type { RawArticle } from "../types";
 
 interface NewsApiArticle {
   title: string;

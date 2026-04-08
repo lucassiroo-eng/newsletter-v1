@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import type { NewsletterConfig } from "../types.js";
+import type { NewsletterConfig } from "../types";
 
 export async function sendEmail(
   html: string,

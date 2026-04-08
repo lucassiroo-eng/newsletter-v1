@@ -1,6 +1,6 @@
-import type { NewsletterConfig } from "./types.js";
+import type { NewsletterConfig } from "./types";
 
-function require(name: string): string {
+function getEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
     throw new Error(
@@ -13,10 +13,10 @@ function require(name: string): string {
 
 export function loadConfig(): NewsletterConfig {
   return {
-    geminiApiKey: require("GEMINI_API_KEY"),
-    resendApiKey: require("RESEND_API_KEY"),
-    toEmail: require("NEWSLETTER_TO_EMAIL"),
-    fromEmail: require("NEWSLETTER_FROM_EMAIL"),
+    geminiApiKey: getEnv("GEMINI_API_KEY"),
+    resendApiKey: getEnv("RESEND_API_KEY"),
+    toEmail: getEnv("NEWSLETTER_TO_EMAIL"),
+    fromEmail: getEnv("NEWSLETTER_FROM_EMAIL"),
     dryRun: process.env["DRY_RUN"] === "true",
   };
 }
