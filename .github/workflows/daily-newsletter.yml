@@ -2,8 +2,8 @@ name: Daily Tech Newsletter
 
 on:
   schedule:
-    # 6:00 AM UTC = 7:00 AM Spain (winter/CET) | 8:00 AM Spain (summer/CEST)
-    - cron: '0 6 * * *'
+    # 5:00 AM UTC = 7:00 AM Spain (summer/CEST) | 6:00 AM Spain (winter/CET)
+    - cron: '0 5 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub Actions tab
 
 jobs:
