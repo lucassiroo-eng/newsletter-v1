@@ -30,9 +30,9 @@ async function main(): Promise<void> {
     throw new Error("No articles collected from any source. Check network connectivity.");
   }
 
-  // 3. Curate top 10 with Gemini AI (free tier)
-  console.log("\n[2/4] Curating top 10 stories with Gemini AI...");
-  const topStories = await curateTopStories(allArticles, today, config.geminiApiKey);
+  // 3. Curate top 10 with Groq/Llama (free tier)
+  console.log("\n[2/4] Curating top 10 stories with Groq AI...");
+  const topStories = await curateTopStories(allArticles, today, config.groqApiKey);
   console.log(`  Selected ${topStories.length} stories`);
   topStories.forEach((s) => console.log(`  ${s.rank}. [${s.category}] ${s.title}`));
 

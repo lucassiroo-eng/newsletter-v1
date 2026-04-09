@@ -3,18 +3,13 @@ import type { RawArticle, CuratedStory } from "../types";
 const SYSTEM_PROMPT =
   "You are an expert tech journalist and startup ecosystem analyst who curates a daily newsletter for a sophisticated European reader: a founder, operator, or investor who wants to stay informed about European startups, global VC trends, AI breakthroughs, and meaningful product launches. You have high standards — you prefer substance over hype. You are concise, insightful, and always explain why something matters for people building or funding companies.";
 
-interface GeminiPart {
-  text: string;
+interface GroqMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
 }
-interface GeminiContent {
-  parts: GeminiPart[];
-}
-interface GeminiCandidate {
-  content: GeminiContent;
-}
-interface GeminiResponse {
-  candidates?: GeminiCandidate[];
-  error?: { message: string; code: number };
+interface GroqResponse {
+  choices?: Array<{ message: { content: string } }>;
+  error?: { message: string };
 }
 
 function deduplicateByUrl(articles: RawArticle[]): RawArticle[] {
@@ -26,31 +21,30 @@ function deduplicateByUrl(articles: RawArticle[]): RawArticle[] {
   });
 }
 
-async function callGemini(userPrompt: string, apiKey: string): Promise<string> {
-  const url =
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`;
-
-  const body = {
-    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-    contents: [{ parts: [{ text: userPrompt }] }],
-    generationConfig: { temperature: 0.2, maxOutputTokens: 4096 },
-  };
-
-  const res = await fetch(url, {
+async function callGroq(messages: GroqMessage[], apiKey: string): Promise<string> {
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b-versatile",
+      messages,
+      temperature: 0.2,
+      max_tokens: 4096,
+    }),
   });
 
-  const data = (await res.json()) as GeminiResponse;
+  const data = (await res.json()) as GroqResponse;
 
   if (!res.ok || data.error) {
     throw new Error(
-      `Gemini API error ${res.status}: ${data.error?.message ?? JSON.stringify(data).slice(0, 300)}`
+      `Groq API error ${res.status}: ${data.error?.message ?? JSON.stringify(data).slice(0, 300)}`
     );
   }
 
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  return data.choices?.[0]?.message?.content ?? "";
 }
 
 export async function curateTopStories(
@@ -59,9 +53,9 @@ export async function curateTopStories(
   apiKey: string
 ): Promise<CuratedStory[]> {
   const unique = deduplicateByUrl(articles);
-  console.log(`Sending ${unique.length} unique articles to Gemini for curation...`);
+  console.log(`Sending ${unique.length} unique articles to Groq/Llama for curation...`);
 
-  const prompt = `Today is ${date}. Below are ${unique.length} news articles collected from tech sources in the last 48 hours.
+  const userPrompt = `Today is ${date}. Below are ${unique.length} news articles collected from tech sources in the last 48 hours.
 
 Your job is to:
 1. Select the 10 most important, interesting, or actionable stories for a tech founder audience.
@@ -83,7 +77,13 @@ Return ONLY a valid JSON array of 10 objects. No commentary before or after. No 
 ARTICLES:
 ${JSON.stringify(unique, null, 2)}`;
 
-  const responseText = await callGemini(prompt, apiKey);
+  const responseText = await callGroq(
+    [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
+    ],
+    apiKey
+  );
 
   let parsed: unknown;
   try {
@@ -92,14 +92,14 @@ ${JSON.stringify(unique, null, 2)}`;
     const match = responseText.match(/\[[\s\S]*\]/);
     if (!match) {
       throw new Error(
-        "Gemini did not return a JSON array. Response:\n" + responseText.slice(0, 500)
+        "Groq did not return a JSON array. Response:\n" + responseText.slice(0, 500)
       );
     }
     parsed = JSON.parse(match[0]);
   }
 
   if (!Array.isArray(parsed) || parsed.length === 0) {
-    throw new Error("Gemini returned an empty or non-array response");
+    throw new Error("Groq returned an empty or non-array response");
   }
 
   return (parsed as CuratedStory[]).slice(0, 10);
