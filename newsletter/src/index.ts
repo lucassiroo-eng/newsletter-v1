@@ -30,9 +30,9 @@ async function main(): Promise<void> {
     throw new Error("No articles collected from any source. Check network connectivity.");
   }
 
-  // 3. Curate top 10 with Claude Haiku (~$0.66/month)
-  console.log("\n[2/4] Curating top 10 stories with Claude AI...");
-  const topStories = await curateTopStories(allArticles, today, config.claudeApiKey);
+  // 3. Curate top 10 with Groq/Llama (free)
+  console.log("\n[2/4] Curating top 10 stories with Groq AI...");
+  const topStories = await curateTopStories(allArticles, today, config.groqApiKey);
   console.log(`  Selected ${topStories.length} stories`);
   topStories.forEach((s) => console.log(`  ${s.rank}. [${s.category}] ${s.title}`));
 
