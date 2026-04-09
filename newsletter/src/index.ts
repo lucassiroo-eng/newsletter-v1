@@ -31,8 +31,8 @@ async function main(): Promise<void> {
   }
 
   // 3. Curate top 10 with Groq/Llama (free)
-  console.log("\n[2/4] Curating top 10 stories with Groq AI...");
-  const topStories = await curateTopStories(allArticles, today, config.groqApiKey);
+  console.log("\n[2/4] Curating top 10 stories with Claude AI...");
+  const topStories = await curateTopStories(allArticles, today, config.anthropicApiKey);
   console.log(`  Selected ${topStories.length} stories`);
   topStories.forEach((s) => console.log(`  ${s.rank}. [${s.category}] ${s.title}`));
 

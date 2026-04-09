@@ -3,9 +3,9 @@ import type { RawArticle, CuratedStory } from "../types";
 const SYSTEM_PROMPT =
   "You are an expert tech journalist and startup ecosystem analyst who curates a daily newsletter for a sophisticated European reader: a founder, operator, or investor who wants to stay informed about European startups, global VC trends, AI breakthroughs, and meaningful product launches. You have high standards — you prefer substance over hype. You are concise, insightful, and always explain why something matters for people building or funding companies.";
 
-interface GroqResponse {
-  choices?: Array<{ message: { content: string } }>;
-  error?: { message: string };
+interface AnthropicResponse {
+  content?: Array<{ type: string; text: string }>;
+  error?: { type: string; message: string };
 }
 
 function deduplicateByUrl(articles: RawArticle[]): RawArticle[] {
@@ -17,33 +17,31 @@ function deduplicateByUrl(articles: RawArticle[]): RawArticle[] {
   });
 }
 
-async function callGroq(userPrompt: string, apiKey: string): Promise<string> {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+async function callClaude(userPrompt: string, apiKey: string): Promise<string> {
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userPrompt },
-      ],
-      temperature: 0.2,
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 4096,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userPrompt }],
     }),
   });
 
-  const data = (await res.json()) as GroqResponse;
+  const data = (await res.json()) as AnthropicResponse;
 
   if (!res.ok || data.error) {
     throw new Error(
-      `Groq API error ${res.status}: ${data.error?.message ?? JSON.stringify(data).slice(0, 300)}`
+      `Anthropic API error ${res.status}: ${data.error?.message ?? JSON.stringify(data).slice(0, 300)}`
     );
   }
 
-  return data.choices?.[0]?.message?.content ?? "";
+  return data.content?.[0]?.text ?? "";
 }
 
 export async function curateTopStories(
@@ -52,7 +50,7 @@ export async function curateTopStories(
   apiKey: string
 ): Promise<CuratedStory[]> {
   const unique = deduplicateByUrl(articles);
-  console.log(`Sending ${unique.length} unique articles to Groq/Llama for curation...`);
+  console.log(`Sending ${unique.length} unique articles to Claude for curation...`);
 
   const userPrompt = `Today is ${date}. Below are ${unique.length} news articles collected from tech sources in the last 48 hours.
 
@@ -76,7 +74,7 @@ Return ONLY a valid JSON array of 10 objects. No commentary before or after. No 
 ARTICLES:
 ${JSON.stringify(unique, null, 2)}`;
 
-  const responseText = await callGroq(userPrompt, apiKey);
+  const responseText = await callClaude(userPrompt, apiKey);
 
   let parsed: unknown;
   try {
@@ -85,14 +83,14 @@ ${JSON.stringify(unique, null, 2)}`;
     const match = responseText.match(/\[[\s\S]*\]/);
     if (!match) {
       throw new Error(
-        "Groq did not return a JSON array. Response:\n" + responseText.slice(0, 500)
+        "Claude did not return a JSON array. Response:\n" + responseText.slice(0, 500)
       );
     }
     parsed = JSON.parse(match[0]);
   }
 
   if (!Array.isArray(parsed) || parsed.length === 0) {
-    throw new Error("Groq returned an empty or non-array response");
+    throw new Error("Claude returned an empty or non-array response");
   }
 
   return (parsed as CuratedStory[]).slice(0, 10);
