@@ -25,7 +25,7 @@ export interface CuratedStory {
 }
 
 export interface NewsletterConfig {
-  groqApiKey: string;
+  claudeApiKey: string;
   resendApiKey: string;
   toEmail: string;
   fromEmail: string;

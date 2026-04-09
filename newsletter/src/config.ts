@@ -13,7 +13,7 @@ function getEnv(name: string): string {
 
 export function loadConfig(): NewsletterConfig {
   return {
-    groqApiKey: getEnv("GROQ_API_KEY"),
+    claudeApiKey: getEnv("ANTHROPIC_API_KEY"),
     resendApiKey: getEnv("RESEND_API_KEY"),
     toEmail: getEnv("NEWSLETTER_TO_EMAIL"),
     fromEmail: getEnv("NEWSLETTER_FROM_EMAIL"),
