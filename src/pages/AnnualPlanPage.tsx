@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useAppStore } from "@/store/appStore";
-import { getWeeksOfYear, type WeekInfo } from "@/lib/weekUtils";
+import { getWeeksOfYear } from "@/lib/weekUtils";
 import { Eye, EyeOff } from "lucide-react";
 
 const CURRENT_YEAR = new Date().getFullYear();

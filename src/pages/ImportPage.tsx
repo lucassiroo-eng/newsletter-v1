@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useAppStore } from "@/store/appStore";
 import Papa from "papaparse";
-import { Upload, CheckCircle, AlertTriangle, FileSpreadsheet } from "lucide-react";
+import { Upload, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface CrmRow {
   nombre_campana?: string;

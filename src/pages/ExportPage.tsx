@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useAppStore } from "@/store/appStore";
 import { getCurrentWeekKey, getWeeksOfYear } from "@/lib/weekUtils";
-import { Download, FileSpreadsheet } from "lucide-react";
+import { Download } from "lucide-react";
 import Papa from "papaparse";
-import { startOfISOWeek, endOfISOWeek, format, addDays } from "date-fns";
+import { format } from "date-fns";
 
 export function ExportPage() {
   const { agents, campaigns, assignments } = useAppStore();
