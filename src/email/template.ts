@@ -62,17 +62,17 @@ function storyCard(story: CuratedStory): string {
                     </td>
                   </tr>
                   <tr>
-                    <td style="padding-bottom:10px;">
+                    <td style="padding-bottom:12px;">
                       <p style="margin:0;font-size:14px;line-height:1.6;color:#333333;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
                         ${story.summary}
                       </p>
                     </td>
                   </tr>
                   <tr>
-                    <td style="border-left:3px solid ${rankColor};padding-left:12px;">
-                      <p style="margin:0;font-size:13px;font-style:italic;color:#555555;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;">
-                        <strong style="color:#333;font-style:normal;">Why it matters:</strong> ${story.whyItMatters}
-                      </p>
+                    <td>
+                      <a href="${story.url}" style="font-size:13px;color:#0066cc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;text-decoration:none;">
+                        Read full article &rarr;
+                      </a>
                     </td>
                   </tr>
                 </table>
