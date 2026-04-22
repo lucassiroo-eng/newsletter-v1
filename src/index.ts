@@ -1,8 +1,10 @@
+import { mkdirSync, writeFileSync } from "fs";
 import { loadConfig } from "./config";
 import { fetchRssArticles } from "./fetchers/rss";
 import { fetchHackerNewsArticles } from "./fetchers/hackerNews";
 import { curateTopStories } from "./curator/claude";
 import { buildEmailHtml } from "./email/template";
+import { buildWebPageHtml } from "./web/template";
 import { sendEmail } from "./email/sender";
 
 async function main(): Promise<void> {
@@ -33,7 +35,7 @@ async function main(): Promise<void> {
   console.log(`  Selected ${topStories.length} stories`);
   topStories.forEach((s) => console.log(`  ${s.rank}. [${s.category}] ${s.title}`));
 
-  console.log("\n[3/4] Building email...");
+  console.log("\n[3/4] Building email & web page...");
   const html = buildEmailHtml(topStories, today);
   const formattedDate = new Date(today).toLocaleDateString("en-GB", {
     weekday: "short",
@@ -41,6 +43,11 @@ async function main(): Promise<void> {
     month: "short",
   });
   const subject = `Daily Tech Digest - ${formattedDate}: Top 10 Startup & Tech Stories`;
+
+  const webHtml = buildWebPageHtml(topStories, today);
+  mkdirSync("public", { recursive: true });
+  writeFileSync("public/index.html", webHtml, "utf-8");
+  console.log("  Web page written → public/index.html");
 
   console.log("\n[4/4] Sending email...");
   await sendEmail(html, subject, config);
