@@ -29,11 +29,6 @@ function formatDate(iso: string): string {
   } catch { return iso; }
 }
 
-function catBadge(category: string, isDark = false): string {
-  const c = (isDark ? CAT_DARK[category] : CAT[category]) ?? { bg: "#f1f5f9", text: "#475569" };
-  return `<span class="cat" style="background:${c.bg};color:${c.text}">${category}</span>`;
-}
-
 function featuredCard(s: CuratedStory): string {
   const color = RANK_COLORS[0]!;
   const c = CAT[s.category] ?? { bg: "#f1f5f9", text: "#475569" };
@@ -41,18 +36,16 @@ function featuredCard(s: CuratedStory): string {
   return `
   <a href="${s.url}" target="_blank" rel="noopener" class="featured-card" data-cat="${s.category}">
     <div class="featured-inner">
-      <div class="featured-left">
-        <div class="featured-top">
-          <div class="rank-badge" style="background:${color}">#1</div>
-          <span class="cat featured-cat" style="--cat-bg:${c.bg};--cat-bg-d:${cd.bg};--cat-text:${c.text};--cat-text-d:${cd.text}">${s.category}</span>
-          <span class="featured-label">Featured Story</span>
-        </div>
-        <h2 class="featured-title">${s.title}</h2>
-        <p class="featured-summary">${s.summary}</p>
-        <div class="featured-meta">
-          <span class="source-txt">${s.source} &middot; ${formatDate(s.publishedAt)}</span>
-          <span class="read-btn">Read full story &rarr;</span>
-        </div>
+      <div class="featured-top">
+        <div class="rank-badge" style="background:${color}">#1</div>
+        <span class="cat featured-cat" style="--cat-bg:${c.bg};--cat-bg-d:${cd.bg};--cat-text:${c.text};--cat-text-d:${cd.text}">${s.category}</span>
+        <span class="featured-label">Featured Story</span>
+      </div>
+      <h2 class="featured-title">${s.title}</h2>
+      <p class="featured-summary">${s.summary}</p>
+      <div class="featured-meta">
+        <span class="source-txt">${s.source} &middot; ${formatDate(s.publishedAt)}</span>
+        <span class="read-btn">Read full story &rarr;</span>
       </div>
     </div>
   </a>`;
@@ -131,7 +124,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
     }
 
     html { scroll-behavior: smooth; }
-
     body {
       font-family: var(--font);
       background: var(--bg);
@@ -140,7 +132,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── HEADER ── */
     header {
       background: linear-gradient(160deg, #0f0c29 0%, #1a1a4e 40%, #24243e 100%);
       padding: 60px 24px 52px;
@@ -171,7 +162,7 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       color: #a5b4fc;
       margin-bottom: 20px;
     }
-    .header-chip::before { content: '\25CF'; font-size: 7px; color: #6366f1; }
+    .header-chip::before { content: '●'; font-size: 7px; color: #6366f1; }
     header h1 {
       font-size: clamp(30px, 6vw, 54px);
       font-weight: 900;
@@ -181,12 +172,7 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       margin-bottom: 14px;
     }
     header h1 span { color: #818cf8; }
-    .header-date {
-      font-size: 15px;
-      color: rgba(255,255,255,.55);
-      font-weight: 500;
-      margin-bottom: 20px;
-    }
+    .header-date { font-size: 15px; color: rgba(255,255,255,.55); font-weight: 500; margin-bottom: 20px; }
     .header-badge {
       display: inline-block;
       font-size: 12px;
@@ -196,7 +182,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       padding: 5px 16px;
     }
 
-    /* ── FILTER BAR ── */
     .filter-wrap {
       position: sticky;
       top: 0;
@@ -230,41 +215,26 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       white-space: nowrap;
     }
     .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .filter-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
+    .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-    /* ── MAIN ── */
     main { max-width: 1200px; margin: 0 auto; padding: 36px 20px 64px; }
 
-    /* ── FEATURED ── */
     .featured-card {
       display: block;
       text-decoration: none;
       color: inherit;
       background: var(--bg2);
       border: 1px solid var(--border);
+      border-left: 4px solid #6366f1;
       border-radius: 20px;
       overflow: hidden;
       margin-bottom: 28px;
       box-shadow: var(--shadow);
       transition: box-shadow .25s ease, transform .25s ease;
-      border-left: 4px solid #6366f1;
     }
-    .featured-card:hover {
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-3px);
-    }
+    .featured-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
     .featured-inner { padding: 32px 36px; }
-    .featured-top {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
+    .featured-top { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
     .rank-badge {
       display: inline-flex;
       align-items: center;
@@ -277,13 +247,7 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       color: #fff;
       flex-shrink: 0;
     }
-    .featured-label {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #6366f1;
-    }
+    .featured-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #6366f1; }
     .featured-title {
       font-size: clamp(20px, 3vw, 28px);
       font-weight: 800;
@@ -292,30 +256,13 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       margin-bottom: 14px;
       color: var(--text);
     }
-    .featured-summary {
-      font-size: 15px;
-      color: var(--text2);
-      line-height: 1.7;
-      margin-bottom: 20px;
-      max-width: 780px;
-    }
-    .featured-meta {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
+    .featured-summary { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; max-width: 780px; }
+    .featured-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
-    /* ── GRID ── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
     @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } .featured-inner { padding: 22px 20px; } }
 
-    /* ── CARD ── */
     .card {
       display: flex;
       flex-direction: column;
@@ -329,32 +276,11 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       box-shadow: var(--shadow-sm);
       transition: box-shadow .22s ease, transform .22s ease;
     }
-    .card:hover {
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-4px);
-    }
+    .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-4px); }
     .card-top { display: flex; align-items: center; gap: 10px; }
-    .rank-num {
-      font-size: 22px;
-      font-weight: 900;
-      line-height: 1;
-      flex-shrink: 0;
-      width: 32px;
-    }
-    .card-title {
-      font-size: 15px;
-      font-weight: 700;
-      line-height: 1.4;
-      letter-spacing: -.2px;
-      color: var(--text);
-      flex: 1;
-    }
-    .card-summary {
-      font-size: 13px;
-      color: var(--text2);
-      line-height: 1.65;
-      flex: 1;
-    }
+    .rank-num { font-size: 22px; font-weight: 900; line-height: 1; flex-shrink: 0; width: 32px; }
+    .card-title { font-size: 15px; font-weight: 700; line-height: 1.4; letter-spacing: -.2px; color: var(--text); flex: 1; }
+    .card-summary { font-size: 13px; color: var(--text2); line-height: 1.65; flex: 1; }
     .card-footer {
       display: flex;
       align-items: center;
@@ -366,7 +292,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       margin-top: auto;
     }
 
-    /* ── SHARED ── */
     .cat {
       display: inline-block;
       padding: 3px 10px;
@@ -386,7 +311,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
     .read-btn {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
       font-size: 14px;
       font-weight: 700;
       color: #6366f1;
@@ -396,28 +320,12 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       transition: background .15s;
     }
     .read-btn:hover { background: rgba(99,102,241,.18); }
-    .read-link {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--accent);
-      white-space: nowrap;
-    }
+    .read-link { font-size: 12px; font-weight: 600; color: var(--accent); white-space: nowrap; }
 
-    /* ── HIDDEN (filter) ── */
     .card.hidden, .featured-card.hidden { display: none; }
-
-    /* ── EMPTY STATE ── */
-    .empty {
-      display: none;
-      grid-column: 1/-1;
-      text-align: center;
-      padding: 40px;
-      color: var(--text3);
-      font-size: 15px;
-    }
+    .empty { display: none; grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text3); font-size: 15px; }
     .empty.show { display: block; }
 
-    /* ── FOOTER ── */
     footer {
       text-align: center;
       padding: 28px 24px;
@@ -430,7 +338,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
 
-    /* ── FADE IN ── */
     .fade-in { opacity: 0; transform: translateY(16px); transition: opacity .4s ease, transform .4s ease; }
     .fade-in.visible { opacity: 1; transform: none; }
   </style>
@@ -467,11 +374,9 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
 </footer>
 
 <script>
-  // Category filter
   const btns = document.querySelectorAll('.filter-btn');
   const cards = document.querySelectorAll('.card, .featured-card');
   const empty = document.getElementById('empty');
-
   btns.forEach(btn => {
     btn.addEventListener('click', () => {
       btns.forEach(b => b.classList.remove('active'));
@@ -486,8 +391,6 @@ export function buildWebPageHtml(stories: CuratedStory[], date: string): string 
       empty.classList.toggle('show', visible === 0);
     });
   });
-
-  // Fade-in on scroll
   const observer = new IntersectionObserver(
     entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }),
     { threshold: 0.08 }
