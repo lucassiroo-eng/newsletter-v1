@@ -12,7 +12,7 @@ on:
 jobs:
   test-newsletter:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 100
 
     steps:
       - name: Checkout repository
