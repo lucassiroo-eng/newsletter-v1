@@ -9,10 +9,13 @@ on:
         default: 'true'
         type: boolean
 
+permissions:
+  contents: write
+
 jobs:
   test-newsletter:
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
@@ -39,3 +42,9 @@ jobs:
           NEWSLETTER_TO_EMAIL: ${{ secrets.NEWSLETTER_TO_EMAIL }}
           NEWSLETTER_FROM_EMAIL: ${{ secrets.NEWSLETTER_FROM_EMAIL }}
           DRY_RUN: ${{ inputs.dry_run }}
+
+      - name: Deploy web page to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public

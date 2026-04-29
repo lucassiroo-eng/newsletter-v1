@@ -4,20 +4,15 @@ on:
   schedule:
     # 5:00 AM UTC = 7:00 AM Spain (summer/CEST) | 6:00 AM Spain (winter/CET)
     - cron: '0 5 * * *'
-  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+  workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 jobs:
   send-newsletter:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -44,14 +39,8 @@ jobs:
           NEWSLETTER_TO_EMAIL: ${{ secrets.NEWSLETTER_TO_EMAIL }}
           NEWSLETTER_FROM_EMAIL: ${{ secrets.NEWSLETTER_FROM_EMAIL }}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public/
-
       - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
