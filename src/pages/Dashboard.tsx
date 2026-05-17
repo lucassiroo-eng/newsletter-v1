@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -147,7 +147,7 @@ function EmptyState({
   title,
   description,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   description: string;
 }) {
