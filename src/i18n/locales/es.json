@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "explore": "Explorar",
+    "settings": "Configuración",
+    "signOut": "Cerrar sesión"
+  },
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "signInWithGoogle": "Iniciar sesión con Google",
+    "signInDesc": "Inicia sesión para crear, gestionar y suscribirte a boletines curados."
+  },
+  "dashboard": {
+    "myNewsletters": "Mis boletines",
+    "subscribed": "Suscrito",
+    "latestIssues": "Últimas ediciones",
+    "createNewsletter": "Crear boletín",
+    "noNewslettersYet": "Aún no hay boletines",
+    "noNewslettersDesc": "Crea tu primer boletín para comenzar."
+  },
+  "newsletter": {
+    "title": "Título",
+    "topic": "Tema",
+    "frequency": "Frecuencia",
+    "sources": "Fuentes",
+    "issues": "Ediciones",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "public": "Público",
+    "private": "Privado",
+    "subscribers": "Suscriptores",
+    "createTitle": "Crear boletín",
+    "createDesc": "Configura un nuevo boletín automatizado.",
+    "addSource": "Añadir fuente",
+    "editSources": "Editar fuentes",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Estás seguro de que quieres eliminar este boletín?"
+  },
+  "explore": {
+    "title": "Explorar",
+    "desc": "Descubre y suscríbete a boletines creados por la comunidad.",
+    "mostPopular": "Más populares",
+    "subscribe": "Suscribirse",
+    "unsubscribe": "Cancelar suscripción",
+    "subscribed": "Suscrito"
+  },
+  "issue": {
+    "stories": "Historias",
+    "readMore": "Leer más",
+    "generatedOn": "Generado el",
+    "sentTo": "Enviado a",
+    "status": "Estado"
+  },
+  "frequency": {
+    "daily": "Diario",
+    "weekly": "Semanal",
+    "biweekly": "Quincenal",
+    "monthly": "Mensual"
+  },
+  "settings": {
+    "title": "Configuración",
+    "language": "Idioma",
+    "profile": "Perfil"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "success": "Éxito",
+    "noResults": "No se encontraron resultados"
+  }
+}

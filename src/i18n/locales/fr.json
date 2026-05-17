@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "explore": "Explorer",
+    "settings": "Paramètres",
+    "signOut": "Se déconnecter"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signInWithGoogle": "Se connecter avec Google",
+    "signInDesc": "Connectez-vous pour créer, gérer et vous abonner à des newsletters curées."
+  },
+  "dashboard": {
+    "myNewsletters": "Mes newsletters",
+    "subscribed": "Abonné",
+    "latestIssues": "Dernières éditions",
+    "createNewsletter": "Créer une newsletter",
+    "noNewslettersYet": "Pas encore de newsletters",
+    "noNewslettersDesc": "Créez votre première newsletter pour commencer."
+  },
+  "newsletter": {
+    "title": "Titre",
+    "topic": "Sujet",
+    "frequency": "Fréquence",
+    "sources": "Sources",
+    "issues": "Éditions",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "public": "Public",
+    "private": "Privé",
+    "subscribers": "Abonnés",
+    "createTitle": "Créer une newsletter",
+    "createDesc": "Configurez une nouvelle newsletter automatisée.",
+    "addSource": "Ajouter une source",
+    "editSources": "Modifier les sources",
+    "delete": "Supprimer",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer cette newsletter ?"
+  },
+  "explore": {
+    "title": "Explorer",
+    "desc": "Découvrez et abonnez-vous aux newsletters créées par la communauté.",
+    "mostPopular": "Les plus populaires",
+    "subscribe": "S'abonner",
+    "unsubscribe": "Se désabonner",
+    "subscribed": "Abonné"
+  },
+  "issue": {
+    "stories": "Articles",
+    "readMore": "Lire la suite",
+    "generatedOn": "Généré le",
+    "sentTo": "Envoyé à",
+    "status": "Statut"
+  },
+  "frequency": {
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "biweekly": "Bimensuel",
+    "monthly": "Mensuel"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "profile": "Profil"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "loading": "Chargement...",
+    "error": "Une erreur est survenue",
+    "success": "Succès",
+    "noResults": "Aucun résultat trouvé"
+  }
+}

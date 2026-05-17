@@ -1,0 +1,73 @@
+{
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "settings": "Settings",
+    "signOut": "Sign Out"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signInWithGoogle": "Sign in with Google",
+    "signInDesc": "Sign in to create, manage, and subscribe to curated newsletters."
+  },
+  "dashboard": {
+    "myNewsletters": "My Newsletters",
+    "subscribed": "Subscribed",
+    "latestIssues": "Latest Issues",
+    "createNewsletter": "Create Newsletter",
+    "noNewslettersYet": "No newsletters yet",
+    "noNewslettersDesc": "Create your first newsletter to get started."
+  },
+  "newsletter": {
+    "title": "Title",
+    "topic": "Topic",
+    "frequency": "Frequency",
+    "sources": "Sources",
+    "issues": "Issues",
+    "active": "Active",
+    "inactive": "Inactive",
+    "public": "Public",
+    "private": "Private",
+    "subscribers": "Subscribers",
+    "createTitle": "Create Newsletter",
+    "createDesc": "Set up a new automated newsletter.",
+    "addSource": "Add Source",
+    "editSources": "Edit Sources",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this newsletter?"
+  },
+  "explore": {
+    "title": "Explore",
+    "desc": "Discover and subscribe to newsletters created by the community.",
+    "mostPopular": "Most Popular",
+    "subscribe": "Subscribe",
+    "unsubscribe": "Unsubscribe",
+    "subscribed": "Subscribed"
+  },
+  "issue": {
+    "stories": "Stories",
+    "readMore": "Read More",
+    "generatedOn": "Generated on",
+    "sentTo": "Sent to",
+    "status": "Status"
+  },
+  "frequency": {
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "biweekly": "Biweekly",
+    "monthly": "Monthly"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "profile": "Profile"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "noResults": "No results found"
+  }
+}
