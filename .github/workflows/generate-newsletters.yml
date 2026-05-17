@@ -24,7 +24,7 @@ jobs:
           node-version: 24
 
       - name: Install script dependencies
-        run: cd scripts && npm ci
+        run: cd scripts && npm install
 
       - name: Run orchestration
         run: node scripts/orchestrate.mjs
