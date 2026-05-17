@@ -71,8 +71,6 @@ function NewsletterCard({
   lastIssueDate?: string;
   onClick: () => void;
 }) {
-  const { t } = useTranslation();
-
   return (
     <button
       onClick={onClick}

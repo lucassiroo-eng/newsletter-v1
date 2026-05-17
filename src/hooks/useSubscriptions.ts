@@ -53,13 +53,7 @@ export function useSubscribe() {
 
       if (error) throw error;
 
-      // Increment subscriber_count via RPC (best-effort)
-      await supabase
-        .rpc("increment_subscriber_count", {
-          p_newsletter_id: newsletterId,
-        })
-        .then(() => { /* success */ })
-        .catch(() => { /* RPC may not exist yet */ });
+      // Subscriber count is updated automatically by the database trigger
 
       return data;
     },
@@ -84,13 +78,7 @@ export function useUnsubscribe() {
 
       if (error) throw error;
 
-      // Decrement subscriber_count via RPC (best-effort)
-      await supabase
-        .rpc("decrement_subscriber_count", {
-          p_newsletter_id: newsletterId,
-        })
-        .then(() => { /* success */ })
-        .catch(() => { /* RPC may not exist yet */ });
+      // Subscriber count is updated automatically by the database trigger
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: MY_SUBSCRIPTIONS_KEY });
