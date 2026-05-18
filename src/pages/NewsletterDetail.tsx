@@ -28,7 +28,7 @@ import { useMySubscriptions, useSubscribe, useUnsubscribe } from "@/hooks/useSub
 import { useAuth } from "@/hooks/useAuth";
 
 const FREQUENCIES = ["daily", "weekly", "biweekly", "monthly"] as const;
-const SOURCE_TYPES = ["rss", "blog", "news", "podcast", "other"] as const;
+const SOURCE_TYPES = ["blog", "news", "rss", "podcast", "other"] as const;
 
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
@@ -77,7 +77,7 @@ export default function NewsletterDetail() {
   // Add source form
   const [newSourceName, setNewSourceName] = useState("");
   const [newSourceUrl, setNewSourceUrl] = useState("");
-  const [newSourceType, setNewSourceType] = useState<string>("rss");
+  const [newSourceType, setNewSourceType] = useState<string>("blog");
 
   const isOwner = newsletter && user && newsletter.owner_id === user.id;
   const isSubscribed = subscriptions?.some(
@@ -85,19 +85,19 @@ export default function NewsletterDetail() {
   );
 
   const handleAddSource = async () => {
-    if (!newSourceName.trim() || !newSourceUrl.trim() || !id) return;
+    if (!newSourceName.trim() || !id) return;
 
     const input: AddSourceInput = {
       newsletter_id: id,
       name: newSourceName.trim(),
-      url: newSourceUrl.trim(),
+      url: newSourceUrl.trim() || null,
       source_type: newSourceType,
     };
 
     await addSource.mutateAsync(input);
     setNewSourceName("");
     setNewSourceUrl("");
-    setNewSourceType("rss");
+    setNewSourceType("blog");
   };
 
   const handleToggleActive = () => {
@@ -364,21 +364,21 @@ export default function NewsletterDetail() {
           {isOwner && (
             <div className="flex flex-col gap-3 rounded-lg border border-dashed border-gray-300 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
               <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                {t("newsletter.addSource", "Add a source")}
+                {t("newsletter.addSourceHint", "Add a content source — URL is optional")}
               </p>
               <div className="flex flex-col gap-2 sm:flex-row">
                 <input
                   type="text"
                   value={newSourceName}
                   onChange={(e) => setNewSourceName(e.target.value)}
-                  placeholder={t("newsletter.sourceName", "Source name")}
+                  placeholder={t("newsletter.sourceName", "e.g. TechCrunch, Hacker News")}
                   className="flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
                 />
                 <input
-                  type="url"
+                  type="text"
                   value={newSourceUrl}
                   onChange={(e) => setNewSourceUrl(e.target.value)}
-                  placeholder={t("newsletter.sourceUrl", "https://...")}
+                  placeholder={t("newsletter.sourceUrl", "https://... (optional)")}
                   className="flex-[2] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder:text-gray-500"
                 />
                 <Select.Root value={newSourceType} onValueChange={setNewSourceType}>
@@ -413,7 +413,6 @@ export default function NewsletterDetail() {
                   onClick={handleAddSource}
                   disabled={
                     !newSourceName.trim() ||
-                    !newSourceUrl.trim() ||
                     addSource.isPending
                   }
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"

@@ -10,7 +10,7 @@ export interface Source {
   is_active: boolean;
 }
 
-export type AddSourceInput = Pick<Source, "newsletter_id" | "name" | "url" | "source_type">;
+export type AddSourceInput = Pick<Source, "newsletter_id" | "name" | "source_type"> & { url: string | null };
 
 const SOURCES_KEY = "sources";
 

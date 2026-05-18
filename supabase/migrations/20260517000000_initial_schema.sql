@@ -36,8 +36,8 @@ CREATE TABLE sources (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   newsletter_id  uuid NOT NULL REFERENCES newsletters(id) ON DELETE CASCADE,
   name           text NOT NULL,
-  url            text NOT NULL,
-  source_type    text DEFAULT 'rss' CHECK (source_type IN ('rss', 'hackernews', 'webpage')),
+  url            text,
+  source_type    text DEFAULT 'blog' CHECK (source_type IN ('rss', 'blog', 'news', 'podcast', 'webpage', 'other')),
   is_active      boolean DEFAULT true,
   created_at     timestamptz DEFAULT now()
 );
