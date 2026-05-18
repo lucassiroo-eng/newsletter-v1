@@ -58,6 +58,8 @@ async function processNewsletter(newsletter) {
     `\n  ${"─".repeat(50)}\n  [${newsletter.title}] topic: ${newsletter.topic} | freq: ${newsletter.frequency}`
   );
 
+  const isManual = !!process.env.NEWSLETTER_ID;
+
   const { data: existingIssue } = await supabase
     .from("issues")
     .select("id")
@@ -65,9 +67,14 @@ async function processNewsletter(newsletter) {
     .eq("date", today)
     .maybeSingle();
 
-  if (existingIssue) {
+  if (existingIssue && !isManual) {
     console.log(`  [skip] Issue already exists for ${today}`);
     return;
+  }
+
+  if (existingIssue && isManual) {
+    console.log(`  [manual] Replacing existing issue for ${today}`);
+    await supabase.from("issues").delete().eq("id", existingIssue.id);
   }
 
   const { data: sources } = await supabase
@@ -82,7 +89,7 @@ async function processNewsletter(newsletter) {
   }
 
   console.log(`  [1] Fetching from ${sources.length} source(s)...`);
-  const articles = await fetchArticlesForSources(sources);
+  const articles = await fetchArticlesForSources(sources, newsletter.topic);
   console.log(`  [1] ${articles.length} unique articles collected`);
 
   if (articles.length === 0) {

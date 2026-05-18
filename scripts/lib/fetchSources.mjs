@@ -26,16 +26,15 @@ export async function fetchFromRss(source) {
   }
 }
 
-export async function fetchFromHackerNews(source) {
+export async function fetchFromHackerNews(query, sourceName) {
   const cutoff = Math.floor(
     (Date.now() - CUTOFF_HOURS * 60 * 60 * 1000) / 1000
   );
-  const query = source.name || "technology";
   const url =
     `https://hn.algolia.com/api/v1/search?` +
     `query=${encodeURIComponent(query)}&` +
     `tags=story&` +
-    `numericFilters=points>=30,created_at_i>=${cutoff}&` +
+    `numericFilters=points>=10,created_at_i>=${cutoff}&` +
     `hitsPerPage=20`;
 
   try {
@@ -47,29 +46,45 @@ export async function fetchFromHackerNews(source) {
       .map((hit) => ({
         title: hit.title,
         url: hit.url,
-        source: "Hacker News",
+        source: sourceName || "Hacker News",
         publishedAt: hit.created_at,
         score: hit.points,
       }));
   } catch (err) {
-    console.warn(`  [!] HN fetch failed: ${err.message}`);
+    console.warn(`  [!] HN search failed for "${query}": ${err.message}`);
     return [];
   }
 }
 
-export async function fetchArticlesForSources(sources) {
+function fetchForSource(source) {
+  if (source.url) {
+    if (source.source_type === "hackernews") {
+      return fetchFromHackerNews(source.name, source.name);
+    }
+    return fetchFromRss(source);
+  }
+  // No URL — search Hacker News by source name
+  return fetchFromHackerNews(source.name, source.name);
+}
+
+export async function fetchArticlesForSources(sources, topic) {
+  const activeSources = sources.filter((s) => s.is_active);
+
+  // Fetch from each source
   const results = await Promise.allSettled(
-    sources
-      .filter((s) => s.is_active)
-      .map((s) => {
-        if (s.source_type === "hackernews") return fetchFromHackerNews(s);
-        return fetchFromRss(s);
-      })
+    activeSources.map((s) => fetchForSource(s))
   );
 
   const articles = [];
   for (const result of results) {
     if (result.status === "fulfilled") articles.push(...result.value);
+  }
+
+  // If no articles from sources, search HN by newsletter topic as fallback
+  if (articles.length === 0 && topic) {
+    console.log(`  [fallback] Searching Hacker News for topic: "${topic}"`);
+    const topicArticles = await fetchFromHackerNews(topic, "Web");
+    articles.push(...topicArticles);
   }
 
   const seen = new Set();
