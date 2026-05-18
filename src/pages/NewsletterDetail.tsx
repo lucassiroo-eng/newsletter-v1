@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import * as Select from "@radix-ui/react-select";
@@ -27,6 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNewsletter, useUpdateNewsletter } from "@/hooks/useNewsletters";
 import { useSources, useAddSource, useDeleteSource, type AddSourceInput } from "@/hooks/useSources";
 import { useIssues, type Issue } from "@/hooks/useIssues";
+import { useQueryClient } from "@tanstack/react-query";
 import { useMySubscriptions, useSubscribe, useUnsubscribe } from "@/hooks/useSubscriptions";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -83,6 +84,14 @@ export default function NewsletterDetail() {
   const [newSourceType, setNewSourceType] = useState<string>("blog");
 
   const [generating, setGenerating] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
 
   const isOwner = newsletter && user && newsletter.owner_id === user.id;
   const isAdmin = user?.email === "lucassiroo@gmail.com";
@@ -101,10 +110,19 @@ export default function NewsletterDetail() {
       toast.success(
         t("newsletter.generateQueued", "Generation triggered — will be ready in a few minutes")
       );
+      // Poll for the new issue every 15s for up to 5 minutes
+      let elapsed = 0;
+      pollRef.current = setInterval(() => {
+        elapsed += 15;
+        queryClient.invalidateQueries({ queryKey: ["issues"] });
+        if (elapsed >= 300) {
+          clearInterval(pollRef.current);
+          setGenerating(false);
+        }
+      }, 15_000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("common.error");
       toast.error(msg);
-    } finally {
       setGenerating(false);
     }
   };
