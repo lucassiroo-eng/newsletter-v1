@@ -1,0 +1,34 @@
+name: Diagnose Newsletter Generation
+
+on:
+  workflow_dispatch:
+    inputs:
+      newsletter_id:
+        description: 'Newsletter ID to diagnose (leave empty to test first)'
+        required: false
+        type: string
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      AZURE_CONFIG: ${{ secrets.AZURE_CONFIG }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      NEWSLETTER_ID: ${{ github.event.inputs.newsletter_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install script dependencies
+        run: cd scripts && npm install
+
+      - name: Run diagnosis
+        run: node scripts/diagnose.mjs
