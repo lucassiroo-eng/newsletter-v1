@@ -7,8 +7,16 @@
   },
   "auth": {
     "signIn": "Se connecter",
+    "signUp": "Créer un compte",
     "signInWithGoogle": "Se connecter avec Google",
-    "signInDesc": "Connectez-vous pour créer, gérer et vous abonner à des newsletters curées."
+    "signInDesc": "Connectez-vous pour créer, gérer et vous abonner à des newsletters curées.",
+    "signUpDesc": "Créez un compte pour commencer à construire vos propres newsletters.",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email",
+    "password": "Mot de passe",
+    "or": "ou",
+    "checkEmail": "Vérifiez votre email pour confirmer votre compte."
   },
   "dashboard": {
     "myNewsletters": "Mes newsletters",

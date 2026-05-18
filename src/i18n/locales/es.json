@@ -7,8 +7,16 @@
   },
   "auth": {
     "signIn": "Iniciar sesión",
+    "signUp": "Crear cuenta",
     "signInWithGoogle": "Iniciar sesión con Google",
-    "signInDesc": "Inicia sesión para crear, gestionar y suscribirte a boletines curados."
+    "signInDesc": "Inicia sesión para crear, gestionar y suscribirte a boletines curados.",
+    "signUpDesc": "Crea una cuenta para empezar a construir tus propios boletines.",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Email",
+    "password": "Contraseña",
+    "or": "o",
+    "checkEmail": "Revisa tu email para confirmar tu cuenta."
   },
   "dashboard": {
     "myNewsletters": "Mis boletines",
