@@ -136,16 +136,28 @@ async function main() {
   console.log(`Newsletter Generator — ${today}`);
   console.log("=".repeat(60));
 
-  const { data: newsletters, error } = await supabase
-    .from("newsletters")
-    .select("*")
-    .eq("is_active", true);
+  const targetId = process.env.NEWSLETTER_ID;
+  let due;
 
-  if (error) throw new Error(`Fetch newsletters: ${error.message}`);
-  console.log(`[→] ${newsletters.length} active newsletter(s) found`);
-
-  const due = newsletters.filter((n) => isDue(n.frequency));
-  console.log(`[→] ${due.length} newsletter(s) due today`);
+  if (targetId) {
+    console.log(`[→] Manual trigger for newsletter: ${targetId}`);
+    const { data, error } = await supabase
+      .from("newsletters")
+      .select("*")
+      .eq("id", targetId)
+      .single();
+    if (error) throw new Error(`Fetch newsletter: ${error.message}`);
+    due = [data];
+  } else {
+    const { data: newsletters, error } = await supabase
+      .from("newsletters")
+      .select("*")
+      .eq("is_active", true);
+    if (error) throw new Error(`Fetch newsletters: ${error.message}`);
+    console.log(`[→] ${newsletters.length} active newsletter(s) found`);
+    due = newsletters.filter((n) => isDue(n.frequency));
+    console.log(`[→] ${due.length} newsletter(s) due today`);
+  }
 
   let processed = 0;
   let failed = 0;

@@ -17,10 +17,13 @@ import {
   Bell,
   BellOff,
   CalendarDays,
+  Sparkles,
 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/layout/AppShell";
+import { supabase } from "@/integrations/supabase/client";
 import { useNewsletter, useUpdateNewsletter } from "@/hooks/useNewsletters";
 import { useSources, useAddSource, useDeleteSource, type AddSourceInput } from "@/hooks/useSources";
 import { useIssues, type Issue } from "@/hooks/useIssues";
@@ -79,10 +82,32 @@ export default function NewsletterDetail() {
   const [newSourceUrl, setNewSourceUrl] = useState("");
   const [newSourceType, setNewSourceType] = useState<string>("blog");
 
+  const [generating, setGenerating] = useState(false);
+
   const isOwner = newsletter && user && newsletter.owner_id === user.id;
+  const isAdmin = user?.email === "lucassiroo@gmail.com";
   const isSubscribed = subscriptions?.some(
     (s) => s.newsletter_id === id
   );
+
+  const handleGenerate = async () => {
+    if (!id) return;
+    setGenerating(true);
+    try {
+      const { error } = await supabase.rpc("request_generation", {
+        p_newsletter_id: id,
+      });
+      if (error) throw error;
+      toast.success(
+        t("newsletter.generateQueued", "Generation triggered — will be ready in a few minutes")
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : t("common.error");
+      toast.error(msg);
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const handleAddSource = async () => {
     if (!newSourceName.trim() || !id) return;
@@ -175,6 +200,20 @@ export default function NewsletterDetail() {
                 {newsletter.topic}
               </p>
             </div>
+            {isAdmin && isOwner && (
+              <button
+                onClick={handleGenerate}
+                disabled={generating}
+                className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
+              >
+                {generating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Sparkles className="h-4 w-4" />
+                )}
+                {t("newsletter.generateNow", "Generate Now")}
+              </button>
+            )}
             {!isOwner && user && (
               <button
                 onClick={handleSubscribeToggle}

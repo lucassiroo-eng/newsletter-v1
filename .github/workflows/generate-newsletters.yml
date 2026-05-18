@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 5 * * *'
   workflow_dispatch:
+    inputs:
+      newsletter_id:
+        description: 'Generate a specific newsletter by ID (leave empty for all due)'
+        required: false
+        type: string
 
 jobs:
   generate:
@@ -28,3 +33,5 @@ jobs:
 
       - name: Run orchestration
         run: node scripts/orchestrate.mjs
+        env:
+          NEWSLETTER_ID: ${{ github.event.inputs.newsletter_id }}
