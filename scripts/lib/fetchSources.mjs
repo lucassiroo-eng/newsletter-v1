@@ -1,27 +1,92 @@
 import Parser from "rss-parser";
 
-const parser = new Parser();
+const parser = new Parser({
+  timeout: 10_000,
+  headers: { "User-Agent": "Mozilla/5.0 (newsletter-bot)" },
+});
 const CUTOFF_HOURS = 72;
 
-export async function fetchFromRss(source) {
-  const cutoff = new Date(Date.now() - CUTOFF_HOURS * 60 * 60 * 1000);
+const RSS_PATH_CANDIDATES = [
+  "/feed",
+  "/feed/",
+  "/rss",
+  "/rss/",
+  "/feed.xml",
+  "/atom.xml",
+  "/rss.xml",
+  "/feeds/all.atom.xml",
+  "/index.xml",
+];
+
+function getBaseUrl(url) {
   try {
-    const feed = await parser.parseURL(source.url);
-    return feed.items
+    const u = new URL(url);
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return url;
+  }
+}
+
+async function tryParseRss(url) {
+  const feed = await parser.parseURL(url);
+  return feed.items || [];
+}
+
+async function discoverAndFetchRss(source) {
+  const cutoff = new Date(Date.now() - CUTOFF_HOURS * 60 * 60 * 1000);
+  const base = getBaseUrl(source.url);
+  const urlsToTry = [source.url, ...RSS_PATH_CANDIDATES.map((p) => base + p)];
+  const tried = new Set();
+
+  for (const url of urlsToTry) {
+    if (tried.has(url)) continue;
+    tried.add(url);
+    try {
+      const items = await tryParseRss(url);
+      if (items.length > 0) {
+        console.log(`  [rss] Found feed at ${url} (${items.length} items)`);
+        return items
+          .filter((item) => {
+            if (!item.isoDate) return true;
+            return new Date(item.isoDate) >= cutoff;
+          })
+          .slice(0, 15)
+          .map((item) => ({
+            title: item.title ?? "(no title)",
+            url: item.link ?? "",
+            source: source.name,
+            publishedAt: item.isoDate ?? new Date().toISOString(),
+            summary: item.contentSnippet?.slice(0, 300),
+          }));
+      }
+    } catch {
+      // Try next path
+    }
+  }
+  console.log(`  [rss] No feed found for ${source.name} after trying ${tried.size} URLs`);
+  return [];
+}
+
+export async function fetchFromGoogleNews(query, sourceName) {
+  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en&gl=US&ceid=US:en`;
+  try {
+    const feed = await parser.parseURL(url);
+    const cutoff = new Date(Date.now() - CUTOFF_HOURS * 60 * 60 * 1000);
+    return (feed.items || [])
       .filter((item) => {
         if (!item.isoDate) return true;
         return new Date(item.isoDate) >= cutoff;
       })
       .slice(0, 15)
       .map((item) => ({
-        title: item.title ?? "(no title)",
+        title: item.title?.replace(/ - .*$/, "") ?? "(no title)",
         url: item.link ?? "",
-        source: source.name,
+        source: sourceName || "Google News",
         publishedAt: item.isoDate ?? new Date().toISOString(),
         summary: item.contentSnippet?.slice(0, 300),
       }));
   } catch (err) {
-    console.warn(`  [!] RSS parse failed for ${source.name} (${source.url}): ${err.message}`);
+    console.warn(`  [!] Google News failed for "${query}": ${err.message}`);
     return [];
   }
 }
@@ -57,22 +122,28 @@ export async function fetchFromHackerNews(query, sourceName) {
 }
 
 async function fetchForSource(source) {
-  // Only attempt RSS parsing for explicit RSS sources with URLs
-  if (source.source_type === "rss" && source.url) {
-    const rssArticles = await fetchFromRss(source);
-    if (rssArticles.length > 0) return rssArticles;
-    // RSS failed — fall through to HN search
+  let articles = [];
+
+  // 1. Try RSS (auto-discover feed if URL is a website)
+  if (source.url) {
+    articles = await discoverAndFetchRss(source);
+    if (articles.length > 0) return articles;
   }
 
-  // For all other types, or RSS fallback: search Hacker News by source name
-  console.log(`  [~] Searching HN for "${source.name}"...`);
-  return fetchFromHackerNews(source.name, source.name);
+  // 2. Google News search by source name
+  console.log(`  [~] Trying Google News for "${source.name}"...`);
+  articles = await fetchFromGoogleNews(source.name, source.name);
+  if (articles.length > 0) return articles;
+
+  // 3. Hacker News search by source name
+  console.log(`  [~] Trying Hacker News for "${source.name}"...`);
+  articles = await fetchFromHackerNews(source.name, source.name);
+  return articles;
 }
 
 function extractKeywords(topic) {
-  // Strip common prompt-like prefixes and extract meaningful words
   const cleaned = topic
-    .replace(/^(actúa como|act as|you are|eres)[\s\S]{0,50}?(,|\.|\n)/i, "")
+    .replace(/^(actúa como|act as|you are|eres)[\s\S]{0,80}?(,|\.|\n)/i, "")
     .replace(/[^a-záéíóúñüA-Z0-9\s]/g, " ")
     .split(/\s+/)
     .filter((w) => w.length > 3)
@@ -93,19 +164,27 @@ export async function fetchArticlesForSources(sources, topic) {
     if (result.status === "fulfilled") articles.push(...result.value);
   }
 
-  // Fallback: search HN with simplified topic keywords
+  // Fallback 1: Google News with topic keywords
   if (articles.length === 0 && topic) {
     const keywords = extractKeywords(topic);
-    console.log(`  [fallback] Searching HN for topic keywords: "${keywords}"`);
-    const topicArticles = await fetchFromHackerNews(keywords, "Web");
-    articles.push(...topicArticles);
+    console.log(`  [fallback] Google News for topic: "${keywords}"`);
+    const gnArticles = await fetchFromGoogleNews(keywords, "Web");
+    articles.push(...gnArticles);
   }
 
-  // Second fallback: broad tech/startup search
+  // Fallback 2: HN with topic keywords
+  if (articles.length === 0 && topic) {
+    const keywords = extractKeywords(topic);
+    console.log(`  [fallback] HN for topic: "${keywords}"`);
+    const hnArticles = await fetchFromHackerNews(keywords, "Web");
+    articles.push(...hnArticles);
+  }
+
+  // Fallback 3: broad tech search
   if (articles.length === 0) {
-    console.log("  [fallback] Broad search: AI startup technology");
-    const broadArticles = await fetchFromHackerNews("AI startup technology", "Web");
-    articles.push(...broadArticles);
+    console.log("  [fallback] Broad: AI startup technology");
+    const broad = await fetchFromHackerNews("AI startup technology", "Web");
+    articles.push(...broad);
   }
 
   const seen = new Set();
