@@ -44,7 +44,9 @@ async function callClaude(system, user) {
     "api-key": key,
   };
 
+  let workingUrl = null;
   let lastError;
+
   for (const url of urls) {
     try {
       console.log(`  [claude] Trying: ${url}`);
@@ -58,6 +60,14 @@ async function callClaude(system, user) {
       if (res.status === 404) {
         console.log(`  [claude] 404 at ${url}, trying next...`);
         continue;
+      }
+
+      if (res.status === 429) {
+        workingUrl = url;
+        const retryAfter = parseInt(res.headers.get("retry-after") || "40", 10);
+        console.log(`  [claude] Rate limited, waiting ${retryAfter}s...`);
+        await new Promise((r) => setTimeout(r, retryAfter * 1000));
+        break;
       }
 
       if (!res.ok) {
@@ -77,7 +87,39 @@ async function callClaude(system, user) {
     }
   }
 
-  throw lastError || new Error("All Azure endpoint URL patterns returned 404");
+  // Retry loop for the working URL (handles 429 rate limits)
+  const retryUrl = workingUrl || urls[0];
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`  [claude] Retry ${attempt}/3 at ${retryUrl}`);
+      const res = await fetch(retryUrl, {
+        method: "POST",
+        headers,
+        body,
+        signal: AbortSignal.timeout(120_000),
+      });
+
+      if (res.status === 429) {
+        const wait = parseInt(res.headers.get("retry-after") || "45", 10);
+        console.log(`  [claude] Still rate limited, waiting ${wait}s...`);
+        await new Promise((r) => setTimeout(r, wait * 1000));
+        continue;
+      }
+
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        throw new Error(`Claude API ${res.status}: ${errBody.slice(0, 300)}`);
+      }
+
+      console.log(`  [claude] Success on retry ${attempt}`);
+      const data = await res.json();
+      return data.content?.[0]?.text ?? "";
+    } catch (err) {
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("All Azure endpoint URL patterns failed");
 }
 
 export async function curateStories(articles, newsletter, date) {
