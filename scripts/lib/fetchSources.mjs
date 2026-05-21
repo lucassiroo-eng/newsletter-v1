@@ -154,33 +154,38 @@ function extractKeywords(topic) {
 
 export async function fetchArticlesForSources(sources, topic) {
   const activeSources = sources.filter((s) => s.is_active);
+  const keywords = topic ? extractKeywords(topic) : "";
 
-  const results = await Promise.allSettled(
+  // 1. Fetch from explicit sources
+  const sourceResults = await Promise.allSettled(
     activeSources.map((s) => fetchForSource(s))
   );
 
   const articles = [];
-  for (const result of results) {
+  for (const result of sourceResults) {
     if (result.status === "fulfilled") articles.push(...result.value);
   }
+  console.log(`  [sources] ${articles.length} articles from explicit sources`);
 
-  // Fallback 1: Google News with topic keywords
-  if (articles.length === 0 && topic) {
-    const keywords = extractKeywords(topic);
-    console.log(`  [fallback] Google News for topic: "${keywords}"`);
-    const gnArticles = await fetchFromGoogleNews(keywords, "Web");
-    articles.push(...gnArticles);
-  }
+  // 2. ALWAYS enrich with Google News + HN for the topic (diverse coverage)
+  if (keywords) {
+    const topicSearches = [
+      `${keywords} technology`,
+      `${keywords} startup`,
+      `${keywords} AI`,
+    ];
+    for (const query of topicSearches) {
+      console.log(`  [enrich] Google News: "${query}"`);
+      const gnArticles = await fetchFromGoogleNews(query, "Google News");
+      articles.push(...gnArticles);
+    }
 
-  // Fallback 2: HN with topic keywords
-  if (articles.length === 0 && topic) {
-    const keywords = extractKeywords(topic);
-    console.log(`  [fallback] HN for topic: "${keywords}"`);
-    const hnArticles = await fetchFromHackerNews(keywords, "Web");
+    console.log(`  [enrich] Hacker News: "${keywords}"`);
+    const hnArticles = await fetchFromHackerNews(keywords, "Hacker News");
     articles.push(...hnArticles);
   }
 
-  // Fallback 3: broad tech search
+  // 3. Fallback: broad search if still nothing
   if (articles.length === 0) {
     console.log("  [fallback] Broad: AI startup technology");
     const broad = await fetchFromHackerNews("AI startup technology", "Web");
