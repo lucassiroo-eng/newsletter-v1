@@ -6,10 +6,12 @@ export interface Story {
   title: string;
   url: string;
   summary: string;
-  why_it_matters: string;
+  why_it_matters?: string;
+  whyItMatters?: string;
   category: string;
   source: string;
-  date: string;
+  date?: string;
+  publishedAt?: string;
 }
 
 export interface Issue {

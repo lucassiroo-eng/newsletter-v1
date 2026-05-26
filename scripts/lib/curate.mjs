@@ -127,23 +127,23 @@ export async function curateStories(articles, newsletter, date) {
     `  Sending ${articles.length} articles to Claude for "${newsletter.title}"...`
   );
 
-  const system = `You are an expert curator for a newsletter called "${newsletter.title}" focused on: ${newsletter.topic}. You select the most relevant, interesting, and actionable stories for readers interested in this topic. You are concise, insightful, and always explain why something matters.`;
+  const system = `You are a sharp, no-BS newsletter curator for "${newsletter.title}". Topic: ${newsletter.topic}. Write like a smart friend texting — punchy, zero filler.`;
 
-  const user = `Today is ${date}. Below are ${articles.length} articles collected from the subscriber's chosen sources in the last 72 hours.
+  const user = `Today is ${date}. ${articles.length} articles below.
 
-Select the top 10 most relevant stories for the topic "${newsletter.topic}".
-
-For each story, produce a JSON object with exactly these fields:
-- "rank": integer 1-10
-- "title": the article title, corrected for clarity if needed
+Pick the 8 best. For each, return a JSON object:
+- "rank": 1-8
+- "title": short punchy headline (max 10 words, rewrite if needed)
 - "url": exact URL from input
-- "source": publication name from input
-- "publishedAt": date string from input
-- "summary": 2-3 factual sentences summarizing what happened
-- "whyItMatters": 1 sentence explaining why a reader interested in "${newsletter.topic}" should care
-- "category": a short category label relevant to the topic (2-3 words max)
+- "source": publication name
+- "publishedAt": date from input
+- "summary": ONE sentence, max 20 words. What happened.
+- "whyItMatters": ONE sentence, max 15 words. Why should I care.
+- "category": 1-2 word label
 
-Return ONLY a valid JSON array of up to 10 objects. No commentary. No code fences.
+IMPORTANT: Keep it SHORT. This is read on mobile. No fluff.
+
+Return ONLY a JSON array. No commentary. No code fences.
 
 ARTICLES:
 ${JSON.stringify(articles, null, 2)}`;
@@ -163,5 +163,5 @@ ${JSON.stringify(articles, null, 2)}`;
     throw new Error("Claude returned empty or non-array response");
   }
 
-  return parsed.slice(0, 10);
+  return parsed.slice(0, 8);
 }
